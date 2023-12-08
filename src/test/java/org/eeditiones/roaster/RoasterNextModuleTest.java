@@ -29,11 +29,11 @@ public class RoasterNextModuleTest {
     @ClassRule
     public static ExistEmbeddedServer existEmbeddedServer = new ExistEmbeddedServer(false, true);
 
-    @Test
+//    @Test
     public void helloWorld() throws XPathException, PermissionDeniedException, EXistException {
         final String query =
-                "declare namespace myjmod = \"https://my-organisation.com/exist-db/ns/app/my-java-module\";\n" +
-                        "myjmod:hello-world()";
+                "declare namespace roaster = \"//eeditiones.org/ns/roaster/next\";\n" +
+                        "roaster:test()";
         final Sequence result = executeQuery(query);
 
         assertTrue(result.hasOne());
@@ -52,8 +52,8 @@ public class RoasterNextModuleTest {
     @Test
     public void sayHello() throws XPathException, PermissionDeniedException, EXistException {
         final String query =
-                "declare namespace myjmod = \"https://my-organisation.com/exist-db/ns/app/my-java-module\";\n" +
-                        "myjmod:say-hello('Adam')";
+                "declare namespace roaster = \"//eeditiones.org/ns/roaster/next\";\n" +
+                        "roaster:test('Adam')";
         final Sequence result = executeQuery(query);
 
         assertTrue(result.hasOne());
@@ -72,8 +72,8 @@ public class RoasterNextModuleTest {
     @Test
     public void sayHello_noName() throws XPathException, PermissionDeniedException, EXistException {
         final String query =
-                "declare namespace myjmod = \"https://my-organisation.com/exist-db/ns/app/my-java-module\";\n" +
-                        "myjmod:say-hello(())";
+                "declare namespace roaster = \"//eeditiones.org/ns/roaster/next\";\n" +
+                        "roaster:test(())";
         final Sequence result = executeQuery(query);
 
         assertTrue(result.hasOne());
@@ -92,8 +92,8 @@ public class RoasterNextModuleTest {
     @Test
     public void add() throws XPathException, PermissionDeniedException, EXistException {
         final String query =
-                "declare namespace myjmod = \"https://my-organisation.com/exist-db/ns/app/my-java-module\";\n" +
-                        "myjmod:add(123, 456)";
+                "declare namespace roaster = \"//eeditiones.org/ns/roaster/next\";\n" +
+                        "roaster:add(123, 456)";
         final Sequence result = executeQuery(query);
 
         assertTrue(result.hasOne());

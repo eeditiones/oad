@@ -726,7 +726,7 @@
             raise-error-on-failed-retrieval="no">
 
         <builtin-modules>
-            <module uri="https://my-organisation.com/exist-db/ns/app/my-java-module" class="org.eeditiones.roaster.RoasterNextModule"/>
+            <module uri="//eeditiones.org/ns/roaster/next" class="org.eeditiones.roaster.RoasterNextModule"/>
         </builtin-modules>
     </xquery>
 

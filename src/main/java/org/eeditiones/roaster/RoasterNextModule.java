@@ -23,9 +23,10 @@ public class RoasterNextModule extends AbstractInternalModule {
     // register the functions of the module
     public static final FunctionDef[] functions = functionDefs(
         functionDefs(RoasterNextFunctions.class,
-                RoasterNextFunctions.FS_HELLO_WORLD,
-                RoasterNextFunctions.FS_SAY_HELLO,
-                RoasterNextFunctions.FS_ADD
+                RoasterNextFunctions.LOAD_FUNCTION,
+                RoasterNextFunctions.PARSE_FUNCTION,
+                RoasterNextFunctions.FLATTEN_FUNCTION,
+                RoasterNextFunctions.RESOLVE_FUNCTION
         )
     );
 

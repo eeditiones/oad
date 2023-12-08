@@ -2,7 +2,7 @@
 <package xmlns="http://expath.org/ns/pkg" name="${package-name}" abbrev="${package-abbrev}" version="${project.version}"
     spec="1.0">
     <title>${package-title}</title>
-    <author id="org.eeditiones">e-editiones.org</author>
+    <author id="org.eeditiones">eeditiones.org</author>
     <website>${project.url}</website>
     <license>GNU Lesser General Public License, version 2.1</license>
     <copyright>true</copyright>
@@ -57,6 +57,57 @@
             <artifactId>swagger-parser</artifactId>
             <version>2.1.19</version>
         </dependencySet>
+        <dependencySet>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-core</artifactId>
+            <version>2.2.19</version>
+        </dependencySet>
+        <dependencySet>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-models</artifactId>
+            <version>2.2.19</version>
+        </dependencySet>
+        <dependencySet>
+            <groupId>io.swagger.parser.v3</groupId>
+            <artifactId>swagger-parser-core</artifactId>
+            <version>2.1.19</version>
+        </dependencySet>
+        <dependencySet>
+            <groupId>io.swagger.parser.v3</groupId>
+            <artifactId>swagger-parser-v3</artifactId>
+            <version>2.1.19</version>
+        </dependencySet>
+        <dependencySet>
+            <groupId>io.swagger.parser.v3</groupId>
+            <artifactId>swagger-parser-safe-url-resolver</artifactId>
+            <version>2.1.19</version>
+        </dependencySet>
+        <dependencySet>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.14.2</version>
+        </dependencySet>
+        <dependencySet>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.15.3</version>
+        </dependencySet>
+        <dependencySet>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+            <version>2.15.3</version>
+        </dependencySet>
+        <dependencySet>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>2.15.2</version>
+        </dependencySet>
+        <dependencySet>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>2.2</version>
+        </dependencySet>
+
     </dependencySets>
 
     <!-- register the Java module to eXist-db -->
