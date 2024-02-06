@@ -388,7 +388,7 @@
             <plugin>
                 <groupId>de.jutzig</groupId>
                 <artifactId>github-release-plugin</artifactId>
-                <version>1.4.0</version>
+                <version>1.6.0</version>
                 <executions>
                     <execution>
                         <id>github-upload</id>
@@ -441,6 +441,10 @@
     </repositories>
 
     <pluginRepositories>
+        <pluginRepository>
+            <id>maven.org</id>
+            <url>https://maven.org/repo</url>
+        </pluginRepository>
         <pluginRepository>
             <id>clojars.org</id>
             <url>https://clojars.org/repo</url>
