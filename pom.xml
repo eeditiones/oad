@@ -359,7 +359,6 @@
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                     <tagNameFormat>v@{project.version}</tagNameFormat>
                     <scmCommentPrefix>chore: </scmCommentPrefix>
-                    <arguments>-P!sonatype-oss-release</arguments>
                 </configuration>
             </plugin>
 
