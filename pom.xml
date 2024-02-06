@@ -396,11 +396,10 @@
                         <goals>
                             <goal>release</goal>
                         </goals>
-                        <inherited>false</inherited>
                         <configuration>
                             <releaseName>v${project.version}</releaseName>
-                            <description>Release of v${project.version}</description>
-                            <tag>${project.version}</tag>
+<!--                            <description>Release of v${project.version}</description>-->
+                            <tag>v${project.version}</tag>
                             <fileSets>
                                 <fileSet>
                                     <directory>${project.build.directory}</directory>
