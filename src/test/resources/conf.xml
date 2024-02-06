@@ -726,7 +726,7 @@
             raise-error-on-failed-retrieval="no">
 
         <builtin-modules>
-            <module uri="//eeditiones.org/ns/roaster/next" class="org.eeditiones.roaster.RoasterNextModule"/>
+            <module uri="//eeditiones.org/ns/oad" class="org.eeditiones.oad.OadModule"/>
         </builtin-modules>
     </xquery>
 

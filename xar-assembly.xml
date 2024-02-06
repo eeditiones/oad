@@ -4,14 +4,14 @@
     <title>${package-title}</title>
     <author id="org.eeditiones">eeditiones.org</author>
     <website>${project.url}</website>
-    <license>GNU Lesser General Public License, version 2.1</license>
+    <license>GNU Lesser General Public License, version 3.0</license>
     <copyright>true</copyright>
 
     <!-- should be either "application" or "library" -->
     <type>library</type>
     <!-- type>library</type -->
 
-    <status>stable</status>
+    <status>beta</status>
 
     <tag>${project.artifactId}</tag>
     <tag>library</tag>
@@ -32,19 +32,7 @@
             <directory>${basedir}/src/main/xar-resources</directory>
         </fileSet>
     </fileSets>
-
-    <!-- include the XQuery Library modules written in XQuery from this project -->
-<!--    <xquerySets>-->
-<!--        <xquerySet>-->
-<!--            <namespace>https://my-organisation.com/exist-db/ns/app/my-xquery-module</namespace>-->
-<!--            <directory>${basedir}/src/main/xquery</directory>-->
-<!--            <includes>-->
-<!--                <include>example-module.xqm</include>-->
-<!--            </includes>-->
-<!--            <outputDirectory>content</outputDirectory>-->
-<!--        </xquerySet>-->
-<!--    </xquerySets>-->
-
+    
     <!-- include the XQuery Library Module written in Java (JAR output) from this project -->
     <dependencySets>
         <dependencySet>
@@ -55,8 +43,10 @@
         <dependencySet>
             <groupId>io.swagger.parser.v3</groupId>
             <artifactId>swagger-parser</artifactId>
-            <version>2.1.19</version>
+            <version>${swagger.version}</version>
         </dependencySet>
+
+        <!-- transient dependencies -->
         <dependencySet>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-core</artifactId>
@@ -69,18 +59,18 @@
         </dependencySet>
         <dependencySet>
             <groupId>io.swagger.parser.v3</groupId>
-            <artifactId>swagger-parser-core</artifactId>
-            <version>2.1.19</version>
+            <artifactId>swagger-parser-v3</artifactId>
+            <version>${swagger.version}</version>
         </dependencySet>
         <dependencySet>
             <groupId>io.swagger.parser.v3</groupId>
-            <artifactId>swagger-parser-v3</artifactId>
-            <version>2.1.19</version>
+            <artifactId>swagger-parser-core</artifactId>
+            <version>${swagger.version}</version>
         </dependencySet>
         <dependencySet>
             <groupId>io.swagger.parser.v3</groupId>
             <artifactId>swagger-parser-safe-url-resolver</artifactId>
-            <version>2.1.19</version>
+            <version>${swagger.version}</version>
         </dependencySet>
         <dependencySet>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -114,7 +104,7 @@
     <components>
         <resource>
             <public-uri>${module.namespace}</public-uri>
-            <file>urn:java:class:org.eeditiones.roaster.${module.java.classname}</file>
+            <file>urn:java:class:org.eeditiones.oad.${module.java.classname}</file>
         </resource>
     </components>
 

@@ -1,63 +1,160 @@
-# Example App for eXist-db
+# OAD [ōd]
 
-This is a simple skeleton Example App for eXist-db which will be built as an EXPath Package using Maven.
+<img alt="OAD utility logo" src="src/main/xar-resources/icon.svg" width="128" />
 
-You can use this as a base for your own eXist-db Apps or Libraries.
+> Parse, validate and convert **O**pen**A**PI **D**efinitions in exist-db.
 
+This is a wrapper around the [Swagger-Parser](https://github.com/swagger-api/swagger-parser) library.
 
-The App contains:
- 
-1. An example XQuery Library Module of user defined functions written in Java.
+## Installation
 
-2. A example XQuery Library Module of user defined functions written in XQuery.
+1. Download a pre-built XAR from the [releases](https://github.com/eeditiones/oad/releases/latest)
+2. Install the package in your exist-db instance
+3. Restart the database
+4. Try
+   ```xquery
+   import module namespace oad="//eeditiones.org/ns/oad";
 
-3. A simple Web landing page for the app itself.   
-
-
-
-1. By default the project is setup for an LGPL 2.1 licensing scheme. You should decide if that is appropriate and if not, make the following modifications:
-
-  1. Modify the `licenses` section in `pom.xml`.
-  
-  2. Override the `configuration` of the license-maven-plugin` in `pom.xml`. See: http://code.mycila.com/license-maven-plugin/
-  
-  3. Potentially remove or replace `LGPL2.1-template.txt`.
-  
-  4. Run `mvn license:check` and `mvn license:format` appropriately. 
-
-1. You should modify the `pom.xml` changing at least the `groupId` and `artifactId` to coordinates that are suitable for your organisation.
-
-2. You should modify, remove, or append to, the files in:
-
-  * `src/main/java` for any XQuery library modules written in Java.
-
-  * `src/main/xquery` for any XQUery library modules written in Java.
-
-  * `src/main/xar-resources` for any static files or XQuery modules that are shipped as part of your app. 
-
-NOTE: You will also need to modify `xar-assembly.xml` to reflect any changes you make to user defined XQuery library modules (whether written in Java or XQuery).
+   oad:report('https://petstore3.swagger.io/api/v3/openapi.json')
+   ```
 
 
-* Requirements: Java 8, Apache Maven 3.3+, Git.
+## Usage
 
-If you want to create an EXPath Package for the app, you can run:
+All module functions assume you have a API specification _stored_ in exist or available via HTTP. The spec can
+be YAML or JSON. It allows to work with internal and external references.
 
-```bash
-$ mvn package
+In order for the Swagger-parser to be able to resolve external, relative references all of them need to be public.
+
+If `$uri` is a DB-path (with or without `xmldb:`) **it will be converted to a REST-lookup first**. This means
+the REST endpoint must be accessible.
+
+### Example
+
+If you have a specification stored in `/db/apps/myapp/api.json`
+
+```json
+{
+  "openapi" : "3.0.2",
+  "info" : { "title" : "my specification", "version": "1.0.0" },
+  "paths" : {
+    "/find" : {
+      "get" : {
+        "responses" : {
+          "200" : {
+            "description" : "result",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
 ```
 
-There will be a `.xar` file in the `target/` sub-folder.
+Then
 
+```xquery
+import module namespace oad="//eeditiones.org/ns/oad";
 
-You can use the Maven Release plugin to publish your applications **publicly** to Maven Central.
-
-1. You need to register to manage the `groupId` of your organisation on Maven Central, see: http://central.sonatype.org/pages/ossrh-guide.html#create-a-ticket-with-sonatype
-
-2. Assuming your Git repo is in-sync, you can simply run the following to upload to Sonatype OSS:
-
-```bash
-$ mvn release:prepare
-$ mvn release:perform
+oad:report('/db/apps/myapp/api.json')
 ```
 
-3. You need to release the artifacts on the Sonatype OSS web portal, see: http://central.sonatype.org/pages/ossrh-guide.html#releasing-to-central
+will return
+
+```xml
+<info>
+    <title>my specification</title>
+    <description/>
+    <version>1.0.0</version>
+    <servers>
+        <server url="/"/>
+    </servers>
+</info>
+```
+
+and
+
+```xquery
+import module namespace oad="//eeditiones.org/ns/oad";
+
+oad:validate('/db/apps/myapp/api.json')
+```
+
+yields
+
+```xquery
+true()
+```
+
+## Functions
+
+### `oad:validate($uri as xs:string) as xs:boolean`
+
+Returns true() if the API definition is valid, false() otherwise (use `oad:report` to see the list of issues found).
+
+### `oad:report($uri as xs:string) as document()`
+
+Inspect the given definition and summarize the information into an XML document with an info-element at its root.
+If the parser encounters issues these are listed as separate error-elements under errors. 
+
+### `oad:flatten($uri as xs:string) as xs:string`
+
+Flatten will inspect the given definition and extract schemas, parameters and such into components. They are then
+replaced by references.
+
+### `oad:resolve($uri as xs:string) as xs:string`
+
+Resolves both internal and external references in an API definition. This will allow you to use it with Roaster, for 
+example.
+
+### `oad:convert($uri as xs:string, map(xs:string, *)) as xs:string`
+
+The swiss-army knife of the available functions. Can convert definitions from one format to the other (JSON to YAML/
+YAML to JSON) while _also_ allowing you to either resolve or flatten the definition.
+
+The available options are listed in the table below:
+
+| option   | description                 | allowed values            | default  |
+|----------|-----------------------------|---------------------------|----------|
+| `format` | serialization format        | `"json"`, `"yaml"`        | `"json"` | 
+| `method` | what to do with references? | `"flatten"`, `"resolve""` | _none_   |
+
+## Build
+
+* Requirements
+  * Java 8
+  * Apache Maven 3.3+
+
+```bash
+mvn package
+```
+
+will create a `oad-<version>.xar` file in the `target/` sub-folder.
+
+## Tests
+
+There are no unit tests that will be executed when building the project.
+The build package does include [xqsuite tests](src/main/xar-resources/xqsuite/oad-test.xqm) which test the integration
+into exist-db works as intended.
+
+You can call that as part of your development workflow by running
+
+```bash
+./run-integration-tests.sh
+```
+
+## Release
+
+```bash
+mvn release:prepare
+```
+```bash
+mvn release:perform
+```

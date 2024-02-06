@@ -1,4 +1,4 @@
-package org.eeditiones.roaster;
+package org.eeditiones.oad;
 
 import org.exist.dom.QName;
 import org.exist.xquery.*;
@@ -11,26 +11,26 @@ import java.util.Map;
 import static org.exist.xquery.FunctionDSL.functionDefs;
 
 /**
- * A very simple example XQuery Library Module implemented
- * in Java.
+ * A wrapper around swagger-parser to work with OpenAPI definitions.
  */
-public class RoasterNextModule extends AbstractInternalModule {
+public class OadModule extends AbstractInternalModule {
 
-    public static final String NAMESPACE_URI = "//eeditiones.org/ns/roaster/next";
-    public static final String PREFIX = "roaster";
+    public static final String NAMESPACE_URI = "//eeditiones.org/ns/oad";
+    public static final String PREFIX = "oad";
     public static final String RELEASED_IN_VERSION = "eXist-6.2.0";
 
     // register the functions of the module
     public static final FunctionDef[] functions = functionDefs(
-        functionDefs(RoasterNextFunctions.class,
-                RoasterNextFunctions.LOAD_FUNCTION,
-                RoasterNextFunctions.PARSE_FUNCTION,
-                RoasterNextFunctions.FLATTEN_FUNCTION,
-                RoasterNextFunctions.RESOLVE_FUNCTION
+        functionDefs(OadFunctions.class,
+                OadFunctions.VALIDATE_FUNCTION,
+                OadFunctions.REPORT_FUNCTION,
+                OadFunctions.FLATTEN_FUNCTION,
+                OadFunctions.RESOLVE_FUNCTION,
+                OadFunctions.CONVERT_FUNCTION
         )
     );
 
-    public RoasterNextModule(final Map<String, List<? extends Object>> parameters) {
+    public OadModule(final Map<String, List<? extends Object>> parameters) {
         super(functions, parameters);
     }
 
@@ -46,7 +46,7 @@ public class RoasterNextModule extends AbstractInternalModule {
 
     @Override
     public String getDescription() {
-        return "Roaster Next";
+        return "Open API Specification Parser";
     }
 
     @Override
@@ -59,14 +59,11 @@ public class RoasterNextModule extends AbstractInternalModule {
         return FunctionDSL.functionSignature(new QName(name, NAMESPACE_URI), description, returnType, paramTypes);
     }
 
-    static FunctionSignature[] functionSignatures(final String name, final String description,
-            final FunctionReturnSequenceType returnType, final FunctionParameterSequenceType[][] variableParamTypes) {
-        return FunctionDSL.functionSignatures(new QName(name, NAMESPACE_URI), description, returnType, variableParamTypes);
-    }
-
-    static class RoasterNextModuleErrorCode extends ErrorCodes.ErrorCode {
-        private RoasterNextModuleErrorCode(final String code, final String description) {
+    static class OadErrorCode extends ErrorCodes.ErrorCode {
+        private OadErrorCode(final String code, final String description) {
             super(new QName(code, NAMESPACE_URI, PREFIX), description);
         }
     }
+
+    static OadErrorCode NO_API = new OadErrorCode("OAD0001", "API definition appears to be empty");
 }
