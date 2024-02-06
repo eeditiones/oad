@@ -56,6 +56,11 @@
 
         <module.namespace>//eeditiones.org/ns/oad</module.namespace>
         <module.java.classname>OadModule</module.java.classname>
+
+        <package-title>${project.name}</package-title>
+        <package-abbrev>${project.artifactId}</package-abbrev>
+        <package-final-name>${project.artifactId}-${project.version}</package-final-name>
+
     </properties>
 
     <dependencyManagement>
