@@ -181,6 +181,7 @@
                     </mavenExecutorId> <!-- avoid a bug with GPG plugin hanging http://jira.codehaus.org/browse/MGPG-9 -->
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                     <tagNameFormat>@{project.version}</tagNameFormat>
+                    <scmCommentPrefix>chore:</scmCommentPrefix>
                 </configuration>
             </plugin>
 
