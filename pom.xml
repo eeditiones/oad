@@ -58,6 +58,17 @@
         <module.java.classname>OadModule</module.java.classname>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.13.2</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>io.swagger.parser.v3</groupId>
@@ -110,6 +121,170 @@
 <!--    </reporting>-->
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>3.2.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.mycila</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <version>4.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>com.code54.mojo</groupId>
+                    <artifactId>buildversion-plugin</artifactId>
+                    <version>1.0.3</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>xml-maven-plugin</artifactId>
+                    <version>1.0.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.10.0</version>
+                    <configuration>
+                        <source>${project.build.source}</source>
+                        <target>${project.build.target}</target>
+                        <encoding>${project.build.sourceEncoding}</encoding>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>ro.kuberam.maven.plugins</groupId>
+                    <artifactId>kuberam-expath-plugin</artifactId>
+                    <version>0.6.3</version>
+                    <executions>
+                        <execution>
+                            <id>create-xar</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>make-xar</goal>
+                            </goals>
+                            <configuration>
+                                <descriptor>xar-assembly.xml</descriptor>
+                                <finalName>${package-final-name}</finalName>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.2.2</version>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            </manifest>
+                            <manifestEntries>
+                                <Build-Tag>${build-tag}</Build-Tag>
+                                <Git-Commit>${build-commit}</Git-Commit>
+                                <Git-Commit-Abbrev>${build-commit-abbrev}</Git-Commit-Abbrev>
+                                <Build-Version>${build-version}</Build-Version>
+                                <Build-Timestamp>${build-tstamp}</Build-Timestamp>
+                                <Source-Repository>${project.scm.connection}</Source-Repository>
+                                <Description>${project.description}</Description>
+                                <Implementation-URL>${project.url}</Implementation-URL>
+                            </manifestEntries>
+                        </archive>
+                    </configuration>
+                </plugin>
+                <!-- Attach source jars -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>3.2.1</version>
+                    <configuration>
+                        <archive>
+                            <manifest>
+                                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            </manifest>
+                            <manifestEntries>
+                                <Build-Tag>${build-tag}</Build-Tag>
+                                <Git-Commit>${build-commit}</Git-Commit>
+                                <Git-Commit-Abbrev>${build-commit-abbrev}</Git-Commit-Abbrev>
+                                <Build-Version>${build-version}</Build-Version>
+                                <Build-Timestamp>${build-tstamp}</Build-Timestamp>
+                                <Source-Repository>${project.scm.connection}</Source-Repository>
+                                <Description>${project.description}</Description>
+                                <Implementation-URL>${project.url}</Implementation-URL>
+                            </manifestEntries>
+                        </archive>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>attach-sources</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                <!-- Attach javadoc jars -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>3.3.2</version>
+                    <executions>
+                        <execution>
+                            <id>attach-javadocs</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <source>${project.build.source}</source>
+                        <archive>
+                            <manifest>
+                                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            </manifest>
+                            <manifestEntries>
+                                <Build-Tag>${build-tag}</Build-Tag>
+                                <Git-Commit>${build-commit}</Git-Commit>
+                                <Git-Commit-Abbrev>${build-commit-abbrev}</Git-Commit-Abbrev>
+                                <Build-Version>${build-version}</Build-Version>
+                                <Build-Timestamp>${build-tstamp}</Build-Timestamp>
+                                <Source-Repository>${project.scm.connection}</Source-Repository>
+                                <Description>${project.description}</Description>
+                                <Implementation-URL>${project.url}</Implementation-URL>
+                            </manifestEntries>
+                        </archive>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-gpg-plugin</artifactId>
+                    <version>3.0.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>2.5.3</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-changes-plugin</artifactId>
+                    <version>2.12.1</version>
+                    <configuration>
+                        <includeOpenIssues>false</includeOpenIssues>
+                        <onlyMilestoneIssues>false</onlyMilestoneIssues>
+                        <columnNames>Type, Summary</columnNames>
+                        <outputDirectory>${project.basedir}</outputDirectory>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+
         <resources>
             <resource>
                 <directory>src/main/xar-resources</directory>
