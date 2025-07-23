@@ -158,3 +158,9 @@ mvn release:prepare
 ```bash
 mvn release:perform
 ```
+
+## Sponsors
+
+This package was made possible thanks to the contributions from following institutions
+
+<img alt="ADW logo" src="resources/sponsor-logo-adw.png" height="100" /> &nbsp; <img alt="EuReD logo" src="resources/sponsor-logo-eured.png" height="100" /> &nbsp; <img alt="ULB logo" src="resources/sponsor-logo-ulb.png" height="100" />
