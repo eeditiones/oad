@@ -163,4 +163,4 @@ mvn release:perform
 
 This package was made possible thanks to the contributions from following institutions
 
-<img alt="ADW logo" src="resources/sponsor-logo-adw.png" height="100" /> &nbsp; <img alt="EuReD logo" src="resources/sponsor-logo-eured.png" height="100" /> &nbsp; <img alt="ULB logo" src="resources/sponsor-logo-ulb.png" height="100" />
+<a href="https://www.adwmainz.de/startseite.html"><img alt="ADW logo" src="resources/sponsor-logo-adw.png" height="100" /></a> &nbsp; <a href="https://eured.de"><img alt="EuReD logo" src="resources/sponsor-logo-eured.png" height="100" /></a> &nbsp; <a href="https://www.ulb.tu-darmstadt.de/die_bibliothek/index.de.jsp"><img alt="ULB logo" src="resources/sponsor-logo-ulb.png" height="100" /></a>
