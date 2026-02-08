@@ -2,10 +2,10 @@ xquery version "3.1";
 
 import module namespace test="http://exist-db.org/xquery/xqsuite"
   at "resource:org/exist/xquery/lib/xqsuite/xqsuite.xql";
-import module namespace tests="//eeditiones.org/ns/oad/tests"
-  at "./oad-test.xqm";
+(: import module namespace tests="//eeditiones.org/ns/oad/tests"
+  at "xmldb:///db/system/repo/oad-1.0.7-SNAPSHOT/xqsuite/oad-test.xqm"; :)
 
-declare variable $path := "./oad-test.xqm";
+declare variable $path := "xmldb:///db/system/repo/oad-1.0.7-SNAPSHOT/xqsuite/oad-test.xqm";
 
 let $test-result := test:suite(inspect:module-functions(xs:anyURI($path)))/node()
 
