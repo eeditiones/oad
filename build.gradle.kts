@@ -1,6 +1,5 @@
 plugins {
     id("java")
-    id("maven-publish")
     id("base")
 }
 
@@ -162,12 +161,6 @@ $jarList
                 into("$buildDir/xar-resources/content")
             }
         }
-
-        // Also copy all runtime dependencies to content (safe, but not required)
-        // copy {
-        //     from(configurations.runtimeClasspath.get())
-        //     into("$buildDir/xar-resources/content")
-        // }
     }
 
 }
@@ -213,44 +206,6 @@ sourceSets {
     }
 }
 
-publishing {
-    publications {
-        create<MavenPublication>("maven") {
-            from(components["java"])
-
-            pom {
-                name.set(project.name)
-                description.set(project.description)
-                url.set("https://github.com/eeditiones/oad")
-
-                organization {
-                    name.set("e-editiones")
-                    url.set("http://eeditiones.org")
-                }
-
-                licenses {
-                    license {
-                        name.set("GNU Lesser General Public License, version 3.0")
-                        url.set("http://opensource.org/licenses/LGPL-3.0")
-                        distribution.set("repo")
-                    }
-                }
-
-                scm {
-                    url.set("https://github.com/eeditiones/oad")
-                    connection.set("scm:git:https://github.com/eeditiones/oad.git")
-                    developerConnection.set("scm:git:https://github.com/eeditiones/oad.git")
-                    tag.set("HEAD")
-                }
-
-                issueManagement {
-                    system.set("GitHub")
-                    url.set("https://github.com/eeditiones/oad/issues")
-                }
-            }
-        }
-    }
-}
 
 tasks.named<Wrapper>("wrapper") {
     gradleVersion = "8.5"
