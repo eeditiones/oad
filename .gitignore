@@ -1,6 +1,5 @@
-target/
-
-*.iml
+build/
+.gradle/
 .idea/
 .vscode/
 .tool-versions
