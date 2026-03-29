@@ -61,16 +61,14 @@ tasks.named<Jar>("jar") {
     manifest {
         attributes(
             "Implementation-Title" to project.name,
-            "Implementation-Version" to project.version,
-            "Implementation-Vendor-Id" to group,
+            "Implementation-Version" to project.version.toString(),
             "Implementation-URL" to "https://github.com/eeditiones/oad",
-            "Source-Repository" to "scm:git:https://github.com/eeditiones/oad.git",
-            "Description" to project.description
+            "Source-Repository" to "scm:git:https://github.com/eeditiones/oad.git"
         )
     }
 }
 
 tasks.named<Wrapper>("wrapper") {
-    gradleVersion = "8.5"
+    gradleVersion = "9.4.1"
     distributionType = Wrapper.DistributionType.BIN
 }
