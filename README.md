@@ -8,18 +8,28 @@ This is a wrapper around the [Swagger-Parser](https://github.com/swagger-api/swa
 
 ## Installation
 
-1. Download a pre-built XAR from the [releases](https://github.com/eeditiones/oad/releases/latest)
-2. Install the package in your exist-db instance
-3. Restart the database
-4. Try
-   ```xquery
-   import module namespace oad="//eeditiones.org/ns/oad";
+Built packages of OAD are available on [GitHub releases](https://github.com/eeditiones/oad/releases/latest)
+and the [public package repository](https://exist-db.org/exist/apps/public-repo/packages/oad?eXist-db-min-version=6.2.0).
 
-   oad:report('https://petstore3.swagger.io/api/v3/openapi.json')
-   ```
+You can visit one of the pages, download the XAR and then install it in your exist-db instance using the package manager.
+Alternatively, you can run the [xst](https://github.com/exist-db/xst) command below.
 
+```sh
+xst packages install from-registry oad
+```
+
+**NOTE:** This XAR comes with addtional JAR files that need to be available at runtime.
+It is safer to restart the database after installation - or upgrade - in order to make sure that
+the classpath was updated.
 
 ## Usage
+
+Try
+```xquery
+import module namespace oad="//eeditiones.org/ns/oad";
+
+oad:report('https://petstore3.swagger.io/api/v3/openapi.json')
+```
 
 All module functions assume you have a API specification _stored_ in exist or available via HTTP. The spec can
 be YAML or JSON. It allows to work with internal and external references.
@@ -129,19 +139,19 @@ The available options are listed in the table below:
 ## Build
 
 * Requirements
-  * Java 8
-  * Apache Maven 3.3+
+  * Java 17
+  * Gradle 8.5
 
 ```bash
-mvn package
+./gradlew build
 ```
 
-will create a `oad-<version>.xar` file in the `target/` sub-folder.
+will create a `oad-<version>.xar` file in the folder `build/libs`.
 
 ## Tests
 
 There are no unit tests that will be executed when building the project.
-The build package does include [xqsuite tests](src/main/xar-resources/xqsuite/oad-test.xqm) which test the integration
+The built package does include [xqsuite tests](src/main/xar-resources/xqsuite/oad-test.xqm) which test the integration
 into exist-db works as intended.
 
 You can call that as part of your development workflow by running
@@ -152,12 +162,12 @@ You can call that as part of your development workflow by running
 
 ## Release
 
-```bash
-mvn release:prepare
-```
-```bash
-mvn release:perform
-```
+- Update the version in build.gradle.kts
+- commit, tag and push the new version
+- build the project
+- draft a new release and add the XAR file to it
+
+**NOTE:** The release process is work in progress after switching to gradle as the build tool.
 
 ## Sponsors
 
