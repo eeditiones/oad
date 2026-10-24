@@ -139,8 +139,7 @@ The available options are listed in the table below:
 ## Build
 
 * Requirements
-  * Java 17
-  * Gradle 8.5
+  * Java 17 or later (the Gradle wrapper is included, no separate Gradle installation needed)
 
 ```bash
 ./gradlew build
@@ -162,12 +161,13 @@ You can call that as part of your development workflow by running
 
 ## Release
 
-- Update the version in build.gradle.kts
-- commit, tag and push the new version
-- build the project
-- draft a new release and add the XAR file to it
+Releases are created by the [CI workflow](.github/workflows/ci.yml) when a tag `v<version>` is pushed.
 
-**NOTE:** The release process is work in progress after switching to gradle as the build tool.
+- Update the version in `gradle.properties`
+- commit, tag (`v<version>`) and push the commit and the tag
+- CI builds the XAR, runs the integration tests and creates a GitHub release with the XAR attached
+
+The tag has to match the version in `gradle.properties`, otherwise no release is created.
 
 ## Sponsors
 
