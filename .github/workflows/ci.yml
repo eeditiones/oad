@@ -12,6 +12,10 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # eXist-db snapshots are published to GitHub Packages
+      packages: read
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
@@ -21,8 +25,10 @@ jobs:
           distribution: zulu
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
-      - name: Build and run XQSuite tests
+      - name: Build and run tests
         run: ./gradlew build
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - id: version
         run: echo "version=$(sed -n 's/^version=//p' gradle.properties)" >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@v4
@@ -30,27 +36,13 @@ jobs:
           name: xar
           path: build/libs/oad-*.xar
           if-no-files-found: error
-
-  # the XQSuite tests run in the build, this checks that the XAR installs
-  # and the module can be called in an eXist-db instance
-  smoke-test:
-    needs: build
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        exist-version: ['6.4.1']
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: xar
-          path: build/libs
       # eXist-db only loads the Java module of a package on startup,
       # so the XAR is autodeployed before the container is started.
-      - name: Start eXist-db ${{ matrix.exist-version }} with oad installed
+      # the latest image is built from develop, as are the snapshots oad is built against
+      - name: Start eXist-db with oad installed
         run: |
-          docker create --name exist -p 8080:8080 existdb/existdb:${{ matrix.exist-version }}
-          docker cp build/libs/oad-${{ needs.build.outputs.version }}.xar exist:/exist/autodeploy/
+          docker create --name exist -p 8080:8080 existdb/existdb:latest
+          docker cp build/libs/oad-${{ steps.version.outputs.version }}.xar exist:/exist/autodeploy/
           docker start exist
           for _ in $(seq 60); do
             [ "$(docker inspect -f '{{.State.Health.Status}}' exist)" = healthy ] && exit 0
@@ -58,6 +50,7 @@ jobs:
           done
           docker logs exist
           exit 1
+      # the tests run in the build, this checks that the XAR installs and the module can be called
       - name: Call oad
         run: |
           query='import module namespace oad="//eeditiones.org/ns/oad";
@@ -71,7 +64,7 @@ jobs:
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [build, smoke-test]
+    needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: write

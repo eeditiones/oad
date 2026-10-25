@@ -3,3 +3,5 @@ build/
 .idea/
 .vscode/
 .tool-versions
+# the XQSuite engine of eXist-db writes failures to target/surefire-reports
+target/

@@ -1,5 +1,5 @@
 import org.existdb.plugin.PackageType.LIBRARY
-import org.existdb.plugin.exist6only
+import org.existdb.plugin.exist7orLater
 
 plugins {
     id("java")
@@ -11,23 +11,37 @@ group = "org.eeditiones.oad"
 description = "Validate, inspect and convert OpenAPI definitions"
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
+
+// eXist-db snapshots are built from develop, like the latest Docker image
+val existVersion = "7.0.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    // eXist-db snapshots are only published to GitHub Packages, which requires a token
+    maven("https://maven.pkg.github.com/eXist-db/exist") {
+        credentials {
+            username = providers.gradleProperty("gpr.user").orElse(providers.environmentVariable("GITHUB_ACTOR")).getOrElse("token")
+            password = providers.gradleProperty("gpr.token").orElse(providers.environmentVariable("GITHUB_TOKEN")).orNull
+        }
+        mavenContent { snapshotsOnly() }
+    }
 }
 
 dependencies {
     implementation("io.swagger.parser.v3:swagger-parser:2.1.19")
     implementation("com.fasterxml.jackson.core:jackson-core:2.15.3")
 
-    compileOnly("org.exist-db:exist-core:6.4.1")
+    compileOnly("org.exist-db:exist-core:$existVersion")
 
-    testImplementation("org.exist-db:exist-core:6.4.1")
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("org.xmlunit:xmlunit-core:2.9.0")
+    testImplementation("org.exist-db:exist-core:$existVersion")
+    // the test harness and the XQSuite JUnit engine are in the tests jar
+    testImplementation("org.exist-db:exist-core:$existVersion:tests")
+    testImplementation(platform("org.junit:junit-bom:6.1.3"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 xar {
@@ -54,7 +68,8 @@ xar {
         "jackson-datatype-jsr310-2.15.3.jar",
         "snakeyaml-2.2.jar"
     )
-    processorDependencies = listOf( exist6only )
+    // the XQuery type constants changed in eXist-db 7, the module does not work with earlier versions
+    processorDependencies = listOf( exist7orLater )
 }
 
 tasks.named<Jar>("jar") {
@@ -69,6 +84,7 @@ tasks.named<Jar>("jar") {
 }
 
 tasks.named<Test>("test") {
+    useJUnitPlatform()
     // the XSuite runner reads the XQSuite tests from here
     inputs.dir("src/test/xquery").withPathSensitivity(PathSensitivity.RELATIVE)
 }
