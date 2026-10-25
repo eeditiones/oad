@@ -48,6 +48,98 @@ declare variable $toad:with-ext-ref-json-spec := '
 
 declare variable $toad:comp-spec := '{ "type" : "string" }';
 
+(: references across collections: api.yaml -> schemas/pet.json -> ../shared/name.yaml :)
+declare variable $toad:nested-ref-yaml-spec := '
+openapi: 3.0.2
+info:
+  title: NESTED REFS
+  version: 1.0.0
+paths:
+  /pets:
+    get:
+      responses:
+        "200":
+          description: a pet
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/pet.json#/components/schemas/Pet"
+';
+
+declare variable $toad:pet-spec := '
+{
+  "components": {
+    "schemas": {
+      "Pet": {
+        "type": "object",
+        "properties": {
+          "name": { "$ref": "../shared/name.yaml" }
+        }
+      }
+    }
+  }
+}
+';
+
+declare variable $toad:nested-ref-yaml-spec-31 := '
+openapi: 3.1.0
+info:
+  title: NESTED REFS 3.1
+  version: 1.0.0
+paths:
+  /pets:
+    get:
+      responses:
+        "200":
+          description: a pet
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/pet.json#/components/schemas/Pet"
+';
+
+declare variable $toad:absolute-ref-json-spec := '
+{
+  "openapi" : "3.0.2",
+  "info" : { "title" : "ABSOLUTE REF", "version": "1.0.0" },
+  "paths" : {
+    "/find" : {
+      "get" : {
+        "responses" : {
+          "200" : {
+            "description" : "result",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "$ref": "/db/oad-test/nested/shared/name.yaml"
+  }}}}}}}}
+}
+';
+
+(: must never be read from the file system of the server :)
+declare variable $toad:escaping-ref-json-spec := '
+{
+  "openapi" : "3.0.2",
+  "info" : { "title" : "ESCAPING REF", "version": "1.0.0" },
+  "paths" : {
+    "/find" : {
+      "get" : {
+        "responses" : {
+          "200" : {
+            "description" : "result",
+            "content" : {
+              "text/plain" : {
+                "schema" : {
+                  "$ref": "../../../../../../../../etc/hosts"
+  }}}}}}}}
+}
+';
+
+declare variable $toad:name-spec := 'type: string
+minLength: 1
+';
+
+
 declare variable $toad:invalid-json-spec := '
 {
   "openapi" : "3.0.2",
@@ -117,7 +209,18 @@ function toad:setup() {
     xmldb:store($toad:collection-path, "invalid.yaml", $toad:invalid-yaml-spec),
 
     xmldb:store($toad:collection-path, "with-ext-ref.json", $toad:with-ext-ref-json-spec),
-    xmldb:store($toad:collection-path, "string.json", $toad:comp-spec)
+    xmldb:store($toad:collection-path, "string.json", $toad:comp-spec),
+
+    xmldb:create-collection($toad:collection-path, "nested"),
+    xmldb:create-collection($toad:collection-path || "nested", "schemas"),
+    xmldb:create-collection($toad:collection-path || "nested", "shared"),
+    xmldb:store($toad:collection-path || "nested", "api.yaml", $toad:nested-ref-yaml-spec),
+    xmldb:store($toad:collection-path || "nested/schemas", "pet.json", $toad:pet-spec),
+    xmldb:store($toad:collection-path || "nested/shared", "name.yaml", $toad:name-spec),
+    xmldb:store($toad:collection-path || "nested", "api31.yaml", $toad:nested-ref-yaml-spec-31),
+
+    xmldb:store($toad:collection-path, "absolute-ref.json", $toad:absolute-ref-json-spec),
+    xmldb:store($toad:collection-path, "escaping-ref.json", $toad:escaping-ref-json-spec)
 };
 
 declare
@@ -254,3 +357,46 @@ declare
 function toad:convert-flatten-yaml($file as xs:string) as xs:boolean {
     exists(oad:convert($toad:collection-path || $file, map{"method": "flatten"}))
 };
+
+declare
+    %test:assertTrue
+function toad:validate-nested-refs() as xs:boolean {
+    oad:validate($toad:collection-path || "nested/api.yaml")
+};
+
+declare
+    %test:assertEquals("string", 1)
+function toad:resolve-nested-refs() {
+    let $resolved := parse-json(oad:resolve($toad:collection-path || "nested/api.yaml"))
+    let $name := $resolved?paths?("/pets")?get?responses?("200")?content?("application/json")?schema?properties?name
+    return ($name?type, $name?minLength)
+};
+
+declare
+    %test:assertEquals("Unable to read location `/db/oad-test/nonexistent.json`")
+function toad:report-non-existent-error-has-db-path() as xs:string {
+    oad:report($toad:collection-path || "nonexistent.json")//error/string()
+};
+
+declare
+    %test:args("nested/api.yaml") %test:assertEquals("string", 1)
+    %test:args("nested/api31.yaml") %test:assertEquals("string", 1)
+function toad:resolve-nested-refs-all-versions($file as xs:string) {
+    let $resolved := parse-json(oad:resolve($toad:collection-path || $file))
+    let $name := $resolved?paths?("/pets")?get?responses?("200")?content?("application/json")?schema?properties?name
+    return ($name?type, $name?minLength)
+};
+
+declare
+    %test:assertEquals("string")
+function toad:resolve-absolute-db-ref() as xs:string? {
+    parse-json(oad:resolve($toad:collection-path || "absolute-ref.json"))
+        ?paths?("/find")?get?responses?("200")?content?("text/plain")?schema?type
+};
+
+declare
+    %test:assertFalse
+function toad:resolve-does-not-read-file-system() as xs:boolean {
+    contains(oad:resolve($toad:collection-path || "escaping-ref.json"), "localhost")
+};
+
