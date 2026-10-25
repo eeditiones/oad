@@ -68,6 +68,11 @@ tasks.named<Jar>("jar") {
     }
 }
 
+tasks.named<Test>("test") {
+    // the XSuite runner reads the XQSuite tests from here
+    inputs.dir("src/test/xquery").withPathSensitivity(PathSensitivity.RELATIVE)
+}
+
 tasks.named<Wrapper>("wrapper") {
     gradleVersion = "9.4.1"
     distributionType = Wrapper.DistributionType.BIN

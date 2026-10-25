@@ -21,7 +21,7 @@ jobs:
           distribution: zulu
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
-      - name: Build and run unit tests
+      - name: Build and run XQSuite tests
         run: ./gradlew build
       - id: version
         run: echo "version=$(sed -n 's/^version=//p' gradle.properties)" >> "$GITHUB_OUTPUT"
@@ -31,7 +31,9 @@ jobs:
           path: build/libs/oad-*.xar
           if-no-files-found: error
 
-  integration:
+  # the XQSuite tests run in the build, this checks that the XAR installs
+  # and the module can be called in an eXist-db instance
+  smoke-test:
     needs: build
     runs-on: ubuntu-latest
     strategy:
@@ -39,7 +41,6 @@ jobs:
       matrix:
         exist-version: ['6.4.1']
     steps:
-      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           name: xar
@@ -57,14 +58,20 @@ jobs:
           done
           docker logs exist
           exit 1
-      - name: Run xqsuite tests
-        run: ./run-integration-tests.sh
+      - name: Call oad
+        run: |
+          query='import module namespace oad="//eeditiones.org/ns/oad";
+            xmldb:store("/db", "smoke.json", "{""openapi"":""3.0.2"",""info"":{""title"":""smoke"",""version"":""1""},""paths"":{}}")
+            ! oad:validate(.)'
+          result=$(curl -sf -u admin: -G http://localhost:8080/exist/rest/db --data-urlencode "_query=$query" --data-urlencode _wrap=no)
+          echo "oad:validate returned: $result"
+          [ "$result" = true ]
       - if: failure()
         run: docker logs exist
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [build, integration]
+    needs: [build, smoke-test]
     runs-on: ubuntu-latest
     permissions:
       contents: write
