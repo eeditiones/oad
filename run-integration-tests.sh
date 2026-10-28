@@ -5,7 +5,7 @@
 # Can be useful for development, as well. Keep in mind that existdb needs to be restarted after each installation
 # for changes to take effect.
 
-version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+version=$(sed -n 's/^version=//p' gradle.properties)
 
 response=$(curl "http://admin@localhost:8080/exist/rest/db/system/repo/oad-$version/xqsuite/testrunner.xq" -s)
 

@@ -101,7 +101,7 @@ public class OadFunctions extends BasicFunction {
 
         final XQueryContext.HttpContext ctx = context.getHttpContext();
         if (ctx == null) {
-            this.restServer = "http://" + System.getProperty("jetty.host") + ":" + System.getProperty("jetty.port", "8080");
+            this.restServer = "http://" + System.getProperty("jetty.host", "localhost") + ":" + System.getProperty("jetty.port", "8080");
             this.restURL = this.restServer + "/exist/rest";
         } else {
             final RequestWrapper rw = ctx.getRequest();

@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build and run unit tests
+        run: ./gradlew build
+      - id: version
+        run: echo "version=$(sed -n 's/^version=//p' gradle.properties)" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: xar
+          path: build/libs/oad-*.xar
+          if-no-files-found: error
+
+  integration:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        exist-version: ['6.4.1']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: xar
+          path: build/libs
+      # eXist-db only loads the Java module of a package on startup,
+      # so the XAR is autodeployed before the container is started.
+      - name: Start eXist-db ${{ matrix.exist-version }} with oad installed
+        run: |
+          docker create --name exist -p 8080:8080 existdb/existdb:${{ matrix.exist-version }}
+          docker cp build/libs/oad-${{ needs.build.outputs.version }}.xar exist:/exist/autodeploy/
+          docker start exist
+          for _ in $(seq 60); do
+            [ "$(docker inspect -f '{{.State.Health.Status}}' exist)" = healthy ] && exit 0
+            sleep 3
+          done
+          docker logs exist
+          exit 1
+      - name: Run xqsuite tests
+        run: ./run-integration-tests.sh
+      - if: failure()
+        run: docker logs exist
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [build, integration]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check tag matches project version
+        run: |
+          if [ "${GITHUB_REF_NAME}" != "v${{ needs.build.outputs.version }}" ]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match version ${{ needs.build.outputs.version }} in gradle.properties"
+            exit 1
+          fi
+      - uses: actions/download-artifact@v4
+        with:
+          name: xar
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${GITHUB_REF_NAME}" oad-*.xar --repo "${GITHUB_REPOSITORY}" --title "${GITHUB_REF_NAME}" --generate-notes
