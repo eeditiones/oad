@@ -14,25 +14,25 @@ import org.exist.source.StringSource;
 import org.exist.xquery.XPathException;
 import org.exist.xquery.XQuery;
 import org.exist.xquery.XQueryContext;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.io.IOException;
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Resolves definitions stored in an embedded database with {@link DbResolver} directly.
  */
 public class DbResolverTest {
 
-    @ClassRule
-    public static ExistEmbeddedServer existEmbeddedServer = new ExistEmbeddedServer(true, true);
+    @RegisterExtension
+    static final ExistEmbeddedServer existEmbeddedServer = new ExistEmbeddedServer(true, true);
 
     private static final String COLLECTION = "/db/dbresolver-test";
 
@@ -58,8 +58,8 @@ public class DbResolverTest {
 
     private static final String NAME = "type: string\nminLength: 1\n";
 
-    @BeforeClass
-    public static void storeDefinitions() throws EXistException, PermissionDeniedException, XPathException, IOException {
+    @BeforeAll
+    static void storeDefinitions() throws EXistException, PermissionDeniedException, XPathException, IOException {
         final String query =
                 "declare variable $api30 external;\n" +
                 "declare variable $api31 external;\n" +
@@ -144,14 +144,14 @@ public class DbResolverTest {
     }
 
     private static void assertResolvedName(final SwaggerParseResult result) {
-        assertTrue(result.getMessages().toString(), result.getMessages().isEmpty());
+        assertTrue(result.getMessages().isEmpty(), result.getMessages().toString());
         final Schema<?> name = petSchema(result.getOpenAPI()).getProperties().get("name");
         assertEquals("string", name.getType() != null ? name.getType() : name.getTypes().iterator().next());
         assertEquals(Integer.valueOf(1), name.getMinLength());
     }
 
     private static void assertUnresolved(final SwaggerParseResult result, final String file) {
-        assertTrue(result.getMessages().toString(), result.getMessages().stream().anyMatch(m -> m != null && m.contains(file)));
+        assertTrue(result.getMessages().stream().anyMatch(m -> m != null && m.contains(file)), result.getMessages().toString());
     }
 
     private static Schema<?> petSchema(final OpenAPI openAPI) {

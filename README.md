@@ -147,10 +147,17 @@ The available options are listed in the table below:
 
 will run the tests and create a `oad-<version>.xar` file in the folder `build/libs`.
 
+oad requires eXist-db 7 and is built and tested against the latest development version of eXist-db (`7.0.0-SNAPSHOT`).
+Use version 1 of oad for eXist-db 6.
+
+eXist-db snapshots are only published to GitHub Packages, which needs a GitHub token with `read:packages`,
+either in `GITHUB_TOKEN` or as `gpr.token` in `~/.gradle/gradle.properties`.
+
 ## Tests
 
 Both the [XQSuite tests](src/test/xquery/oad-test.xqm) and the JUnit tests in [src/test/java](src/test/java)
-run against an embedded eXist-db as part of the build.
+run on the JUnit Platform against an embedded eXist-db as part of the build.
+The XQSuite tests are run by eXist-db's XQSuite engine, [XQSuiteTest](src/test/java/org/eeditiones/oad/XQSuiteTest.java) points it at the test files.
 To only run the tests, use
 
 ```bash

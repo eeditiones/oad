@@ -77,7 +77,7 @@ public class OadFunctions extends BasicFunction {
             "Convert OpenAPI specification between formats, allowing to inline or extract $refs. Keys are 'format': 'yaml' or 'json' (default) and 'mode': 'flatten', 'resolve'",
             returns(Type.STRING),
             resourceParam,
-            optParam("options", Type.MAP, "Options")
+            optParam("options", Type.MAP_ITEM, "Options")
     );
 
     private static final String FLATTEN_FUNCTION_NAME = "flatten";
