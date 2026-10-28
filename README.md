@@ -145,19 +145,21 @@ The available options are listed in the table below:
 ./gradlew build
 ```
 
-will create a `oad-<version>.xar` file in the folder `build/libs`.
+will run the tests and create a `oad-<version>.xar` file in the folder `build/libs`.
 
 ## Tests
 
-There are no unit tests that will be executed when building the project.
-The built package does include [xqsuite tests](src/main/xar-resources/xqsuite/oad-test.xqm) which test the integration
-into exist-db works as intended.
-
-You can call that as part of your development workflow by running
+Both the [XQSuite tests](src/test/xquery/oad-test.xqm) and the JUnit tests in [src/test/java](src/test/java)
+run against an embedded eXist-db as part of the build.
+To only run the tests, use
 
 ```bash
-./run-integration-tests.sh
+./gradlew test
+./gradlew test --tests org.eeditiones.oad.DbResolverTest  # a single test class
 ```
+
+The embedded database is configured in [conf.xml](src/test/resources/conf.xml), which also registers the oad module.
+Some tests read API definitions from petstore3.swagger.io and need network access.
 
 ## Release
 
@@ -165,7 +167,7 @@ Releases are created by the [CI workflow](.github/workflows/ci.yml) when a tag `
 
 - Update the version in `gradle.properties`
 - commit, tag (`v<version>`) and push the commit and the tag
-- CI builds the XAR, runs the integration tests and creates a GitHub release with the XAR attached
+- CI builds the XAR, runs the tests, checks that the XAR can be installed and creates a GitHub release with the XAR attached
 
 The tag has to match the version in `gradle.properties`, otherwise no release is created.
 

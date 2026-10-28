@@ -20,6 +20,7 @@ import org.exist.xquery.functions.map.MapType;
 import org.exist.xquery.value.*;
 
 import javax.xml.XMLConstants;
+import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -34,7 +35,6 @@ import static org.eeditiones.oad.OadModule.functionSignature;
  */
 public class OadFunctions extends BasicFunction {
 
-    private final String restURL;
     private final String restServer;
 
     private static final QName ERRORS = new QName("errors", XMLConstants.NULL_NS_URI);
@@ -102,11 +102,9 @@ public class OadFunctions extends BasicFunction {
         final XQueryContext.HttpContext ctx = context.getHttpContext();
         if (ctx == null) {
             this.restServer = "http://" + System.getProperty("jetty.host", "localhost") + ":" + System.getProperty("jetty.port", "8080");
-            this.restURL = this.restServer + "/exist/rest";
         } else {
             final RequestWrapper rw = ctx.getRequest();
             this.restServer = rw.getScheme() + "://" + rw.getServerName() + ":" + rw.getServerPort();
-            this.restURL = this.restServer + rw.getContextPath() + "/rest";
         }
     }
 
@@ -141,8 +139,21 @@ public class OadFunctions extends BasicFunction {
         return new StringValue(serialize(result, false));
     }
 
-    private SwaggerParseResult read(final String location, final ParseOptions parseOptions) {
-        return new OpenAPIV3Parser().readLocation(location, null, parseOptions);
+    private SwaggerParseResult read(final String location, final ParseOptions parseOptions) throws XPathException {
+        if (isUrl(location)) {
+            return new OpenAPIV3Parser().readLocation(location, null, parseOptions);
+        }
+
+        try {
+            return new DbResolver(context.getBroker()).read(location, parseOptions);
+        } catch (final UncheckedIOException e) {
+            throw new XPathException(this, ErrorCodes.FODC0002, "Unable to read " + location + ": " + e.getCause().getMessage());
+        }
+    }
+
+    private static boolean isUrl(final String location) {
+        final String lower = location.toLowerCase();
+        return lower.startsWith("http://") || lower.startsWith("https://");
     }
 
     /**
@@ -167,7 +178,7 @@ public class OadFunctions extends BasicFunction {
      *
      * @return true() if valid, false() when errors are present
      */
-    private BooleanValue validate(final String location) {
+    private BooleanValue validate(final String location) throws XPathException {
         final SwaggerParseResult result = read(location, null);
         final OpenAPI openAPI = result.getOpenAPI();
         final boolean errors = !result.getMessages().isEmpty();
@@ -183,7 +194,7 @@ public class OadFunctions extends BasicFunction {
      *
      * @return API definition info
      */
-    private Sequence parse(final String location) {
+    private Sequence parse(final String location) throws XPathException {
         final SwaggerParseResult result = read(location, null);
         return renderResult(result);
     }
@@ -320,7 +331,7 @@ public class OadFunctions extends BasicFunction {
             // no scheme, figure out collectionPath
             final XmldbURI xUri = XmldbURI.create(uri);
             if (xUri.isCollectionPathAbsolute()) {
-                return toRestUrl(xUri.getCollectionPath());
+                return xUri.getCollectionPath();
             }
 
             final AnyURIValue maybeBaseUri = context.getBaseURI();
@@ -331,16 +342,13 @@ public class OadFunctions extends BasicFunction {
             final URI baseUri = maybeBaseUri.toURI();
             if (!baseUri.toString().endsWith("/")) {
                 final URI resolved = new URI(baseUri.toString() + '/').resolve(uri);
-                return toRestUrl(resolved.getPath());
+                return resolved.getPath();
             }
-            return toRestUrl(xUri.getCollectionPath());
+            return xUri.getCollectionPath();
         } catch (final URISyntaxException e) {
             throw new XPathException(context.getRootExpression(), ErrorCodes.FODC0005, e);
         }
     }
 
-    private String toRestUrl(final String path) {
-        return  this.restURL + path;
-    }
 
 }
